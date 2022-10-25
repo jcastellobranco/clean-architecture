@@ -12,6 +12,7 @@ import { ClearCartUseCase } from "../@core/application/cart/clear-cart-use-case"
 import { Cart } from "../@core/domain/entities/cart";
 import { container, Registry } from "../@core/infra/container-registry";
 import { Product } from "../@core/domain/entities/product";
+import { GetCartUseCase } from "../@core/application/cart/get-cart-use-case";
 
 
 export type CartContextType = {
@@ -19,6 +20,7 @@ export type CartContextType = {
     addProduct: (product: Product) => void;
     removeProduct: (productId: number) => void;
     clear: () => void;
+    reload:()=> void;
 }
 
 const defaultContext: CartContextType = {
@@ -26,9 +28,11 @@ const defaultContext: CartContextType = {
     addProduct: (product:Product) => { },
     removeProduct: (productId:number) => { },
     clear: () => { },
+    reload:() => { },
 }
 
 export const CartContext = createContext(defaultContext);
+const getUseCase = container.get<GetCartUseCase>(Registry.GetCartUseCase)
 
 const addProductUseCase = container.get<AddProductInCartUseCase>(Registry.AddProductInCartUseCase)
 const removeProductUseCase = container.get<RemoveProductFromCartUseCase>(Registry.RemoveProductFromCartUseCase)
@@ -52,6 +56,15 @@ export const CartProvider = ({ children }: PropsWithChildren) => {
         setCart(cart);
     }, []);
 
+    const reload = useCallback(()=>{
+        const cart = getUseCase.execute()
+        setCart(cart);
+    },[])
+
+    useEffect(()=>{
+        reload();
+    },[reload])
+
     return (
         <CartContext.Provider
             value={{
@@ -59,6 +72,7 @@ export const CartProvider = ({ children }: PropsWithChildren) => {
                 addProduct,
                 removeProduct,
                 clear,
+                reload
             }}
         >
             {children}
