@@ -5,7 +5,7 @@ import { ProductGateway } from "../../domain/gateways/product.gateway";
 export class ProductHttpGateway implements ProductGateway {
     constructor(private http: AxiosInstance) { }
 
-    findAll(): Promise<Product[]> {
+    async findAll(): Promise<Product[]> {
         return this.http.get<Product[]>('/products').then((res) =>
             res.data.map(
                 (data) =>
@@ -19,7 +19,7 @@ export class ProductHttpGateway implements ProductGateway {
         );
     }
 
-    findById(id: number): Promise<Product> {
+    async findById(id: number): Promise<Product> {
         return this.http.get<Product>(`/products/${id}`).then((res) => {
             return new Product({
                 id: res.data.id,
@@ -27,8 +27,7 @@ export class ProductHttpGateway implements ProductGateway {
                 description: res.data.description,
                 price: res.data.price,
 
-            })
-        }
-        );
+            });
+        });
     }
 }

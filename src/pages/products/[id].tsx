@@ -2,12 +2,13 @@
 
 import { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import { useContext } from "react";
+import { GetProductUseCase } from "../../@core/application/product/getproduct.use-case";
+import { ProductsProps } from "../../@core/domain/entities/product";
+import { container, Registry } from "../../@core/infra/container-registry";
 import { CartContext } from "../../context/cart.provider";
-import { http } from "../../utils/http";
-import { Product } from "../../utils/models";
 
 type ProductDetailPageProps = {
-    product: Product
+    product: ProductsProps;
 }
 
 export const ProductDetailPage: NextPage<ProductDetailPageProps> = ({product}) => {
@@ -34,10 +35,12 @@ export const getStaticPaths: GetStaticPaths = async () =>{
 
 export const getStaticProps: GetStaticProps = async (context) => {
     const {id} = context.params || {};
-    const { data: product } = await http.get(`products/${id}`)
+    const useCase = container.get<GetProductUseCase>(Registry.GetProductUseCase)
+
+    const product = await useCase.execute(+id!)
     return {
         props: {
-            product
+            product:product.toJSON(),
         }
     }
 }

@@ -1,14 +1,13 @@
 import type { GetServerSideProps, NextPage } from 'next'
-import Head from 'next/head'
-import Image from 'next/image'
 import Link from 'next/link'
 import { ListProductsUseCase } from '../@core/application/product/list-products.use-case'
-import { ProductHttpGateway } from '../@core/infra/gateways/product-http.gateway'
-import { http } from '../utils/http'
-import { Product } from '../utils/models'
+import { ProductsProps } from '../@core/domain/entities/product'
+import { container, Registry } from '../@core/infra/container-registry'
+
+
 
 type HomeProps = {
-  products: Product[]
+  products: ProductsProps[]
 }
 
 const Home: NextPage<HomeProps> = ({ products }) => {
@@ -20,7 +19,7 @@ const Home: NextPage<HomeProps> = ({ products }) => {
           <li key={key}>
             <label>Nome:</label> {product.name} |
             <Link href={`/products/${product.id}`} passHref>
-             <a href="">Ver</a> 
+              <a href="">Ver</a>
             </Link>
           </li>
         ))}
@@ -32,12 +31,20 @@ const Home: NextPage<HomeProps> = ({ products }) => {
 export default Home
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const gateway = new ProductHttpGateway(http);
-  const useCase = new ListProductsUseCase(gateway);
+
+  const useCase = container.get<ListProductsUseCase>(Registry.ListProductsUseCase);
   const products = await useCase.execute();
+
   return {
     props: {
-      products,
-    }
-  }
-}
+      products: products.map((product) => product.toJSON()),
+    },
+  };
+};
+
+// class ListProductsUseCaseFactory {
+//   static create() {
+//     const gateway = new ProductHttpGateway(http);
+//     return new ListProductsUseCase(gateway);
+//   }
+// }
