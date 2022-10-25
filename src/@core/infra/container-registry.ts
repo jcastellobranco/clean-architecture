@@ -1,3 +1,4 @@
+import "reflect-metadata";
 import { Container } from 'inversify';
 import { ListProductsUseCase } from '../application/product/list-products.use-case';
 import { http } from './http';
